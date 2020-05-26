@@ -46,7 +46,7 @@ sudo apt install -y graylog-server
 cd /etc/graylog/server
 pwd
 sudo rm -f server.conf
-wget "https://raw.githubusercontent.com/burhanudinarshad/sri/master/graylog/server.conf"
+wget "https://raw.githubusercontent.com/srimanchiru/graylogk/master/graylog/server.conf"
 
 systemctl stop graylog-server
 systemctl daemon-reload
