@@ -31,11 +31,11 @@ sudo cp -r consoles/ console_libraries/ /etc/prometheus/
 #Create systemd unit file
 cd /etc/systemd/system/
 pwd
-sudo wget "https://raw.githubusercontent.com/burhanudinarshad/sri/master/prometheus.service"
+sudo wget "https://raw.githubusercontent.com/srimanchiru/graylogk/master/prometheus.service"
 
 cd /etc/prometheus/
 pwd
-sudo wget "https://raw.githubusercontent.com/burhanudinarshad/sri/master/prometheus.yml"
+sudo wget "https://raw.githubusercontent.com/srimanchiru/graylogk/master/prometheus.yml"
 
 # Change directory permissions to Prometheus user and group
 sudo chown -R prometheus:prometheus /etc/prometheus/  /var/lib/prometheus/
