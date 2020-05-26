@@ -1,0 +1,124 @@
+{
+   "AWSTemplateFormatVersion": "2010-09-09",
+   "Description": "AWS CloudFormation sample template. Installs Grafana, Prometheus, Nagios and Graylog-server",
+   "Parameters": {
+      "KeyName": {
+         "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instance",
+         "Type": "AWS::EC2::KeyPair::KeyName",
+         "ConstraintDescription": "Can contain only ASCII characters."
+      },
+      "InstanceType": {
+         "Description": "WebServer EC2 instance type",
+         "Type": "String",
+         "Default": "t2.large"
+      },
+      "SSHLocation": {
+         "Description": "The IP address range that can be used to SSH to the EC2 instances",
+         "Type": "String",
+         "MinLength": "9",
+         "MaxLength": "18",
+         "Default": "0.0.0.0/0",
+         "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+         "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x"
+      }
+   },
+   "Resources": {
+      "WebServerInstance": {
+         "Type": "AWS::EC2::Instance",
+         "Properties": {
+            "ImageId": [
+               "ami-05801d0a3c8e4c443"
+            ],
+            "InstanceType": {
+               "Ref": "InstanceType"
+            },
+            "SecurityGroups": [
+               {
+                  "Ref": "WebServerSecurityGroup"
+               }
+            ],
+            "KeyName": {
+               "Ref": "KeyName"
+            },
+            "UserData": {
+               "Fn::Base64": {
+                  "Fn::Join": [
+                     "",
+                     [
+                        "#!/bin/bash -xe\n",
+                        "sudo apt-get update\n",
+                        "sudo wget 'https://raw.githubusercontent.com/srimanchiru/master/graylog/graylog.sh'\n",
+                        "sudo sh /graylog.sh\n",
+                        "sudo wget 'https://raw.githubusercontent.com/srimanchiru/graylogk/master/Grafana.sh'\n",
+                        "sudo sh /Grafana.sh\n",
+                        "sudo wget 'https://raw.githubusercontent.com/srimanchiru/master/prometheus.sh'\n",
+                        "sudo sh /prometheus.sh\n",
+                        "sudo wget 'https://raw.githubusercontent.com/srimanchiru/master/nagios.sh'\n",
+                        "sudo sh /nagios.sh\n"
+                     ]
+                  ]
+               }
+            }
+         }
+      },
+      "WebServerSecurityGroup": {
+         "Type": "AWS::EC2::SecurityGroup",
+         "Properties": {
+            "GroupDescription": "Enable port 80 for nagios, 3000 for grafana, 9090 for prometheus, 9000 for graylog",
+            "SecurityGroupIngress": [
+               {
+                  "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "CidrIp": "0.0.0.0/0"
+               },
+               {
+                  "IpProtocol": "tcp",
+                  "FromPort": "3000",
+                  "ToPort": "3000",
+                  "CidrIp": "0.0.0.0/0"
+               },
+               {
+                  "IpProtocol": "tcp",
+                  "FromPort": "9000",
+                  "ToPort": "9000",
+                  "CidrIp": "0.0.0.0/0"
+               },
+               {
+                  "IpProtocol": "tcp",
+                  "FromPort": "9090",
+                  "ToPort": "9090",
+                  "CidrIp": "0.0.0.0/0"
+               },
+               {
+                  "IpProtocol": "tcp",
+                  "FromPort": "22",
+                  "ToPort": "22",
+                  "CidrIp": {
+                     "Ref": "SSHLocation"
+                  }
+               }
+            ]
+         }
+      }
+   },
+   "Outputs": {
+      "WebsiteURL": {
+         "Description": "URL for newly created GrayLog stack",
+         "Value": {
+            "Fn::Join": [
+               "",
+               [
+                  "http://",
+                  {
+                     "Fn::GetAtt": [
+                        "WebServerInstance",
+                        "PublicDnsName"
+                     ]
+                  }
+               ]
+            ]
+         }
+      }
+   }
+}
