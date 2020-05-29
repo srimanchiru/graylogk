@@ -30,34 +30,11 @@
          "Description":"WebServer EC2 instance type",
          "Type":"String",
          "Default":"t2.large"
-      }
-   },
-   "Mappings":{
-      "RegionMap":{
-         "us-east-1":{
-            "AMI":"ami-7f418316"
-         },
-         "us-west-1":{
-            "AMI":"ami-951945d0"
-         },
-         "us-west-2":{
-            "AMI":"ami-003634241a8fcdec0"
-         },
-         "eu-west-1":{
-            "AMI":"ami-24506250"
-         },
-         "sa-east-1":{
-            "AMI":"ami-3e3be423"
-         },
-         "ap-southeast-1":{
-            "AMI":"ami-74dda626"
-         },
-         "ap-southeast-2":{
-            "AMI":"ami-b3990e89"
-         },
-         "ap-northeast-1":{
-            "AMI":"ami-dcfa4edd"
-         }
+      },
+      "ImageId":{
+         "Description":"WebServer EC2 instance AMI",
+         "Type":"String",
+         "Default":"ami-003634241a8fcdec0"
       }
    },
    "Resources":{
@@ -108,12 +85,20 @@
                   "CidrIp":{
                      "Ref":"SSHLocation"
                   }
+               },
+               {
+                  "IpProtocol":"tcp",
+                  "FromPort":"12202",
+                  "ToPort":"12202",
+                  "CidrIp":{
+                     "Ref":"SSHLocation"
+                  }
                }
             ],
             "SecurityGroupEgress":[
                {
                   "IpProtocol":"-1",
-				  "CidrIp": "0.0.0.0/0"
+		  "CidrIp": "0.0.0.0/0"
                }
             ]
          }
@@ -121,15 +106,11 @@
       "Ec2Instance":{
          "Type":"AWS::EC2::Instance",
          "Properties":{
-            "ImageId":{
-               "Fn::FindInMap":[
-                  "RegionMap",
-                  {
-                     "Ref":"AWS::Region"
-                  },
-                  "AMI"
-               ]
-            },
+            "ImageId":[
+               {
+                  "Ref":"ImageId"
+               }
+            ],
             "SecurityGroupIds":[
                {
                   "Ref":"InstanceSecurityGroup"
@@ -151,13 +132,13 @@
                      [
                         "#!/bin/bash -xe\n",
                         "sudo apt-get update\n",
-                        "sudo wget 'https://raw.githubusercontent.com/srimanchiru/master/graylog/graylog.sh'\n",
+                        "sudo wget 'https://raw.githubusercontent.com/srimanchiru/graylogk/master/graylog/graylog.sh'\n",
                         "sudo sh /graylog.sh\n",
                         "sudo wget 'https://raw.githubusercontent.com/srimanchiru/graylogk/master/Grafana.sh'\n",
                         "sudo sh /Grafana.sh\n",
-                        "sudo wget 'https://raw.githubusercontent.com/srimanchiru/master/prometheus.sh'\n",
+                        "sudo wget 'https://raw.githubusercontent.com/srimanchiru/graylogk/master/prometheus.sh'\n",
                         "sudo sh /prometheus.sh\n",
-                        "sudo wget 'https://raw.githubusercontent.com/srimanchiru/master/nagios.sh'\n",
+                        "sudo wget 'https://raw.githubusercontent.com/srimanchiru/graylogk/master/nagios.sh'\n",
                         "sudo sh /nagios.sh\n"
                      ]
                   ]
